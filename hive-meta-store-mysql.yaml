@@ -1,0 +1,39 @@
+  mysql:
+    image: mysql:5.7
+    platform: linux/amd64
+    container_name: mysql
+    hostname: hivemysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: metastore
+      MYSQL_USER: hive
+      MYSQL_PASSWORD: hive
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+
+  hive-metastore:
+    image: bde2020/hive:2.3.2
+    platform: linux/amd64
+    container_name: hivemetastore
+    hostname: hivemetastore
+    environment:
+      HIVE_METASTORE_DB_TYPE: mysql
+      HIVE_METASTORE_DB_HOSTNAME: hivemysql
+      HIVE_METASTORE_DB_PORT: 3306
+      HIVE_METASTORE_DB_NAME: hive_metastore
+      HIVE_METASTORE_DB_USERNAME: hive
+      HIVE_METASTORE_DB_PASSWORD: hive
+      HIVE_METASTORE_USER: hive
+      HIVE_METASTORE_PASSWORD: hive
+      HIVE_METASTORE_URI: thrift://hivemetastore:9083
+      HIVE_METASTORE_WAREHOUSE_DIR: /user/hive/warehouse
+      HADOOP_CONF_DIR: /etc/hadoop/conf
+    depends_on:
+      - mysql
+      - namenode
+      - datanode1
+      - datanode2
+    ports:
+      - "9083:9083"
